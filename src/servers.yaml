@@ -1,0 +1,21 @@
+switches:
+  - name: "SW-25"
+    ip_address: "172.30.133.25"
+    community_string: "public"
+    port_count: 24
+
+  - name: "SW-15"
+    ip_address: "172.30.133.15"
+    community_string: "private"
+    port_count: 48
+
+  - name: "SW-22"
+    ip_address: "172.30.133.22"
+    community_string: "jokumuu"
+    port_count: 8
+
+oids:
+  - name: "Ports"
+    description: "Scan all the interfaces of the switch"
+    oid: "1.3.6.1.2.1.2.2.1.7"
+    iterable: true
