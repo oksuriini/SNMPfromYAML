@@ -23,7 +23,14 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	// TODO
 
-	spack.ListSwitches()
+	// TODO get results
+
+	r := spack.GetOidsFromSwitches()
+
+	// r := spack.GetResults()
+
+	// TODO process results
+
+	// r.ProcessResults()
 }
