@@ -4,6 +4,8 @@ import (
 	"SwitchSNMP/servsnmp"
 	"flag"
 	"fmt"
+
+	"github.com/gosnmp/gosnmp"
 )
 
 // File variable to hold flag value for input file
@@ -24,13 +26,28 @@ func main() {
 		return
 	}
 
-	// TODO get results
+	// Get results
 
-	r := spack.GetOidsFromSwitches()
-
-	// r := spack.GetResults()
+	spack.GetOidsFromSwitches()
 
 	// TODO process results
 
-	// r.ProcessResults()
+	for _, v := range spack.ArrSwitchSNMP {
+		fmt.Printf("Switch %s results: \n\n", v.SwitchName)
+		for i, j := range v.Results.Variables {
+			fmt.Printf("%d: oid: %s ", i, j.Name)
+
+			switch j.Type {
+			case gosnmp.OctetString:
+				bytes := j.Value.([]byte)
+				fmt.Printf("string: %s\n", string(bytes))
+			default:
+				fmt.Printf("number: %d\n", gosnmp.ToBigInt(j.Value))
+			}
+		}
+
+		fmt.Println("Program stopped")
+	}
 }
+
+// r.ProcessResults() <-- not this simple

@@ -11,11 +11,12 @@ import (
 
 // SwitchSNMP struct to hold information of each switch
 type SwitchSNMP struct {
-	SwitchName   string        `yaml:"name"`
-	IpAddress    string        `yaml:"ip_address"`
-	CommunityStr string        `yaml:"community_string"`
-	PortCount    int           `yaml:"port_count"`
-	snmpObj      gosnmp.GoSNMP `yaml:"snmp_obj"`
+	SwitchName   string `yaml:"name"`
+	IpAddress    string `yaml:"ip_address"`
+	CommunityStr string `yaml:"community_string"`
+	PortCount    int    `yaml:"port_count"`
+	snmpObj      gosnmp.GoSNMP
+	Results      gosnmp.SnmpPacket
 }
 
 // OidStruct struct to hold information of each oid
@@ -109,10 +110,13 @@ func (s SnmpPack) ListSwitches() {
 	}
 }
 
+func (s *SwitchSNMP) setResult(result gosnmp.SnmpPacket) {
+	s.Results = result
+}
+
 // Method executes given Oids to switches in SnmpPack, and returns results in gosnmp.SnmpPacket structure
 // for further processing.
-func (s SnmpPack) GetOidsFromSwitches() []*gosnmp.SnmpPacket {
-	results := []*gosnmp.SnmpPacket{}
+func (s *SnmpPack) GetOidsFromSwitches() {
 	for _, v := range s.ArrSwitchSNMP {
 		if err := v.snmpObj.Connect(); err != nil {
 			fmt.Println(err)
@@ -123,7 +127,6 @@ func (s SnmpPack) GetOidsFromSwitches() []*gosnmp.SnmpPacket {
 			fmt.Println(err)
 			continue
 		}
-		results = append(results, result)
+		v.setResult(*result)
 	}
-	return results
 }
