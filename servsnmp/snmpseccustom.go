@@ -15,8 +15,12 @@ type SwitchSNMP struct {
 	IpAddress    string `yaml:"ip_address"`
 	CommunityStr string `yaml:"community_string"`
 	PortCount    int    `yaml:"port_count"`
-	snmpObj      gosnmp.GoSNMP
-	Results      gosnmp.SnmpPacket
+
+	// Holds GoSNMP struct used to make Get(oids) to switches
+	snmpObj gosnmp.GoSNMP
+
+	// Holds Get(oids) results
+	Results gosnmp.SnmpPacket
 }
 
 // OidStruct struct to hold information of each oid
@@ -34,6 +38,8 @@ type SnmpPack struct {
 	ArrOids       []OidStruct  `yaml:"oids"`
 }
 
+// Now sure if this is even used ???
+// You break it you fix it
 func NewSwitchSNMP(portCount int, communityStr string, ipAddress string, switchName string) SwitchSNMP {
 	swSnmp := SwitchSNMP{
 		PortCount:    portCount,
@@ -50,6 +56,10 @@ func createsnmpObj(communityStr string, ipAddress string) gosnmp.GoSNMP {
 
 	snmpObj.Target = ipAddress
 	snmpObj.Community = communityStr
+	snmpObj.Version = gosnmp.Version2c
+	snmpObj.Port = 161
+
+	// fmt.Println(snmpObj)
 
 	return *snmpObj
 }
@@ -81,6 +91,9 @@ func CreateFromYaml(fileName string) (SnmpPack, error) {
 	if err != nil {
 		return SnmpPack{}, err
 	}
+	for i, v := range s.ArrSwitchSNMP {
+		s.ArrSwitchSNMP[i].snmpObj = createsnmpObj(v.CommunityStr, v.IpAddress)
+	}
 	return s, nil
 }
 
@@ -93,7 +106,7 @@ func (s SnmpPack) getOids(iterator int) []string {
 		// As this is purely built for checking switch interface status this isn't very dynamic
 		if v.Iterable {
 			for i := 1; i <= iterator; i++ {
-				oids = append(oids, fmt.Sprintf("%s.%s\n", v.Oid, fmt.Sprint(i)))
+				oids = append(oids, fmt.Sprintf("%s.%s", v.Oid, fmt.Sprint(i)))
 			}
 		} else {
 			oids = append(oids, v.Oid)
@@ -117,16 +130,17 @@ func (s *SwitchSNMP) setResult(result gosnmp.SnmpPacket) {
 // Method executes given Oids to switches in SnmpPack, and returns results in gosnmp.SnmpPacket structure
 // for further processing.
 func (s *SnmpPack) GetOidsFromSwitches() {
-	for _, v := range s.ArrSwitchSNMP {
+	for i, v := range s.ArrSwitchSNMP {
 		if err := v.snmpObj.Connect(); err != nil {
+			fmt.Println("ERROR in connecting")
 			fmt.Println(err)
 			continue
 		}
 		result, err := v.snmpObj.Get(s.getOids(v.PortCount))
 		if err != nil {
-			fmt.Println(err)
-			continue
+			fmt.Println("ERROR GETTING RESULTS")
 		}
-		v.setResult(*result)
+
+		s.ArrSwitchSNMP[i].setResult(*result)
 	}
 }
