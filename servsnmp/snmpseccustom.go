@@ -1,5 +1,9 @@
 package servsnmp
 
+// REMINDER !!!!
+// This was built to scan switch interfaces (ports if you may) so while other OID objects might work, the structures
+// and functions are not assured to work nicely (or at all) with them.
+
 import (
 	"bufio"
 	"fmt"
@@ -38,8 +42,7 @@ type SnmpPack struct {
 	ArrOids       []OidStruct  `yaml:"oids"`
 }
 
-// Now sure if this is even used ???
-// You break it you fix it
+// This works as a wrapper to create our snmpObj, which allows us to make connections to snmp servers (w/e it is)
 func NewSwitchSNMP(portCount int, communityStr string, ipAddress string, switchName string) SwitchSNMP {
 	swSnmp := SwitchSNMP{
 		PortCount:    portCount,
@@ -48,6 +51,7 @@ func NewSwitchSNMP(portCount int, communityStr string, ipAddress string, switchN
 		SwitchName:   switchName,
 		snmpObj:      createsnmpObj(communityStr, ipAddress),
 	}
+
 	return swSnmp
 }
 
@@ -115,11 +119,13 @@ func (s SnmpPack) getOids(iterator int) []string {
 	return oids
 }
 
-// For debugging purposes
+// For debugging purposes <- redacted
+// Not anymore uses CreateFileFromResults to save results
 func (s SnmpPack) ListSwitches() {
 	fmt.Println("Printing switches found in yaml file:")
 	for _, v := range s.ArrSwitchSNMP {
-		fmt.Printf("Switch: %s \nIP-Address: %s \nCommunityString: %s \nPort Count: %d \n\n", v.SwitchName, v.IpAddress, v.CommunityStr, v.PortCount)
+		result := fmt.Sprintf("Switch: %s \nIP-Address: %s \nCommunityString: %s \nPort Count: %d \n\n", v.SwitchName, v.IpAddress, v.CommunityStr, v.PortCount)
+		createFileFromResults(result)
 	}
 }
 
@@ -139,8 +145,13 @@ func (s *SnmpPack) GetOidsFromSwitches() {
 		result, err := v.snmpObj.Get(s.getOids(v.PortCount))
 		if err != nil {
 			fmt.Println("ERROR GETTING RESULTS")
+			continue
 		}
 
 		s.ArrSwitchSNMP[i].setResult(*result)
 	}
+}
+
+func createFileFromResults(s string) {
+	os.WriteFile("results", []byte(s), 0666)
 }
