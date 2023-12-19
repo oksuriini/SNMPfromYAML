@@ -1,0 +1,28 @@
+switches:
+  # Use whatever name you want. This is purely metadata
+  # - name: "SW-25"
+  # IP address has to be correct
+  #   ip_address: "172.30.133.25"
+  # Use community string that this specific switch has
+  #   community_string: "public"
+  # Use port count based on basic interfaces + uplink interfaces
+  #   port_count: 24
+
+  - name: "SW-TESTI"
+    ip_address: "172.30.133.159"
+    community_string: "public"
+    port_count: 24
+
+oids:
+  # Name is purely metadata
+  - name: "Ports"
+    # Descriptor is good for documentation purposes. Still metadata.
+    # Good idea to tell here to which switches this is designated to
+    description: "Scan all the interfaces of the switch. HP Procurve 2626"
+    # OID has to match
+    # If OID is parent to many children and it's iterable,
+    # use the parent and then set iterable to true state
+    # Otherwise just use the oid you want to seek and set iterable to false state
+    oid: "1.3.6.1.2.1.2.2.1.7"
+    # Set this to true or false based on if the oid is iterable
+    iterable: true
