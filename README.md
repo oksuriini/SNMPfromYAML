@@ -21,7 +21,7 @@ Run program from sources:
 Alternatively run program from sources with flags:
 ```go run ./src/ -f "testitiedosto.yaml"```
 
-...or with single mode: ( NOT IMPLEMENTED)
+...or with single mode: ( NOT IMPLEMENTED) <br>
 ```go run ./src/ -f -m -s "172.30.133.122" -c "public" -o "1.3.2.1.6.1.2.5.12"```
 
 Change "servers.yaml" file properties to make sure it works in your environment.
